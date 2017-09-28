@@ -13,6 +13,9 @@ gem 'font-awesome-rails'
 gem 'russian'
 
 group :development, :test do
+  gem 'rspec-rails', '~> 3.4'
+  gem 'factory_girl_rails'
+  gem 'shoulda-matchers'
   gem 'sqlite3'
   gem 'byebug'
 end
