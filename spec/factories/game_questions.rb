@@ -7,7 +7,7 @@ FactoryGirl.define do
     d 1
 
     #проставляем связи. связующие объекты поумолчанию будут искаться из папаки factories
-    association :user
+    association :question
     association :game
   end
 end

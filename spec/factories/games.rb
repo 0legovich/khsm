@@ -7,6 +7,7 @@ FactoryGirl.define do
     is_failed false
     prize 0
 
+    #создаем еще одну фабрику, которая унаследована от родительской
     factory :game_with_questions do
       after(:build) { |game|
         15.times do |i|
