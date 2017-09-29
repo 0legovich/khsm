@@ -5,7 +5,7 @@ RSpec.describe GameQuestion, type: :model do
   let(:game_question) {FactoryGirl.create(:game_question, a: 2, b: 1, c: 4, d: 3)}
 
   #Проверяем корректность методов связанных с ответами
-  context 'game_status' do
+  context 'check methods' do
     it 'correct .variants' do
       expect(game_question.variants).to eq(
                                           {
@@ -19,6 +19,9 @@ RSpec.describe GameQuestion, type: :model do
 
     it 'correct .answer_correct?' do
       expect(game_question.answer_correct?('b')).to be_truthy
+      end
+    it 'correct .correct_answer_key' do
+      expect(game_question.correct_answer_key).to eq 'b'
     end
   end
 
