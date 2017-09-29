@@ -22,4 +22,11 @@ RSpec.describe GameQuestion, type: :model do
     end
   end
 
+  #проверяем delegate методы
+  context 'check delegate methods' do
+    it 'there is .text .level' do
+      expect {game_question.text}.not_to raise_exception
+      expect {game_question.level}.not_to raise_exception
+    end
+  end
 end
