@@ -83,5 +83,15 @@ RSpec.describe Game, type: :model do
       game_w_questions.created_at = 2.days.ago
       expect(game_w_questions.status).to eq(:timeout)
     end
+
+    it 'current level get correctly answer' do
+      game_w_questions.current_level = 2
+      #у игры 2 уровня должен быть сейчас доступен 2 вопрос
+      expect(game_w_questions.current_game_question).to eq(game_w_questions.game_questions[2])
+      #у игры 2 уровня НЕ должен быть сейчас доступен 3 вопрос
+      expect(game_w_questions.current_game_question).not_to eq(game_w_questions.game_questions[3])
+      #предыдущий уровень - это "текущий уровень" - 1
+      expect(game_w_questions.previous_level).to eq(1)
+    end
   end
 end
