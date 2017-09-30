@@ -55,7 +55,7 @@ RSpec.describe Game, type: :model do
 
   #тест метода #take_money!
   describe '#take_money!' do
-    it '.take_money! finishes the game and get money' do
+    it 'finishes the game and get money' do
       #сразу изменяем левел игры (на каком вопросе находимся)
       game_w_questions.current_level = 2
 
@@ -100,17 +100,11 @@ RSpec.describe Game, type: :model do
   describe '#current_game_question' do
 
     # возвращает корректный вопрос в соответствии с текущим уровнем
-    context 'return correct question in accordance current_level' do
-      it 'avaliable correct question' do
-        game_w_questions.current_level = 2
-        #у игры 2 уровня должен быть сейчас доступен 2 вопрос
-        expect(game_w_questions.current_game_question).to eq(game_w_questions.game_questions[2])
-      end
-
-      it 'not avaliable incorrect question' do
-        #у игры 2 уровня НЕ должен быть сейчас доступен 3 вопрос
-        expect(game_w_questions.current_game_question).not_to eq(game_w_questions.game_questions[3])
-      end
+    it 'return correct question in accordance current_level' do
+      game_w_questions.current_level = 2
+      #у игры 2 уровня должен быть сейчас доступен 2 вопрос
+      expect(game_w_questions.current_game_question).to eq(game_w_questions.game_questions[2])
+      expect(game_w_questions.current_game_question).not_to eq(game_w_questions.game_questions[3])
     end
   end
 
