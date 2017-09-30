@@ -10,8 +10,8 @@ RSpec.describe Game, type: :model do
   let(:game_w_questions) {FactoryGirl.create(:game_with_questions, user: user)}
 
   #тесты на создание новой игры
-  context 'Game Factory' do
-    it 'Game.create_game_for_user! new correct game' do
+  describe '#Game.create_game_for_user!' do
+    it 'create new correct game' do
       generate_questions(60)
 
       game = nil
@@ -30,8 +30,11 @@ RSpec.describe Game, type: :model do
     end
   end
 
-  #тесты на основную игру
-  context 'game mechanics' do
+  # тестируем игру: если ответили на правильный вопрос, то:
+  # игра не завершилась;
+  # уровень поднялся;
+  # вопрос сменился;
+  describe 'game mechanics' do
     it 'correct answer continue game' do
       level = game_w_questions.current_level
       q = game_w_questions.current_game_question
@@ -46,7 +49,12 @@ RSpec.describe Game, type: :model do
       expect(game_w_questions.status).to eq (:in_progress)
       expect(game_w_questions.finished?).to be_falsey
     end
+  end
 
+  #тестируем методы
+
+  #тест метода #take_money!
+  describe '#take_money!' do
     it '.take_money! finishes the game and get money' do
       #сразу изменяем левел игры (на каком вопросе находимся)
       game_w_questions.current_level = 2
@@ -62,34 +70,54 @@ RSpec.describe Game, type: :model do
       expect(game_w_questions.finished?).to be_truthy
       expect(user.balance).to eq (game_w_questions.prize)
     end
+  end
 
+  # тест метода #status
+  describe '#status' do
     it '.status get correct status game' do
-      #игру только начали - она в процесе
+      # игру только начали - она в процесе
       expect(game_w_questions.status).to eq(:in_progress)
 
-      #игру закончили, но не зафейлили и время не вышло
+      # игру закончили, но не зафейлили и время не вышло
       game_w_questions.finished_at = Time.now
       expect(game_w_questions.status).to eq(:money)
 
-      #игру закончили и ответили на 15 вопросов
+      # игру закончили и ответили на 15 вопросов
       game_w_questions.current_level = 15
       expect(game_w_questions.status).to eq(:won)
 
-      #игру закончили, но зафейлили (не смотря на то, что теоретически ответили на 15 вопросов)
+      # игру закончили, но зафейлили (не смотря на то, что теоретически ответили на 15 вопросов)
       game_w_questions.is_failed = true
       expect(game_w_questions.status).to eq(:fail)
 
-      #игру закончили при этом время уже вышло
+      # игру закончили при этом время уже вышло
       game_w_questions.created_at = 2.days.ago
       expect(game_w_questions.status).to eq(:timeout)
     end
+  end
 
-    it 'current level get correctly answer' do
+  # тест метода #current_game_question
+  describe '#current_game_question' do
+
+    # возвращает корректный вопрос в соответствии с текущим уровнем
+    context 'return correct question in accordance current_level' do
+      it 'avaliable correct question' do
+        game_w_questions.current_level = 2
+        #у игры 2 уровня должен быть сейчас доступен 2 вопрос
+        expect(game_w_questions.current_game_question).to eq(game_w_questions.game_questions[2])
+      end
+
+      it 'not avaliable incorrect question' do
+        #у игры 2 уровня НЕ должен быть сейчас доступен 3 вопрос
+        expect(game_w_questions.current_game_question).not_to eq(game_w_questions.game_questions[3])
+      end
+    end
+  end
+
+  #тест метода #previous_level
+  describe '#current_game_question' do
+    it 'get correctly answer' do
       game_w_questions.current_level = 2
-      #у игры 2 уровня должен быть сейчас доступен 2 вопрос
-      expect(game_w_questions.current_game_question).to eq(game_w_questions.game_questions[2])
-      #у игры 2 уровня НЕ должен быть сейчас доступен 3 вопрос
-      expect(game_w_questions.current_game_question).not_to eq(game_w_questions.game_questions[3])
       #предыдущий уровень - это "текущий уровень" - 1
       expect(game_w_questions.previous_level).to eq(1)
     end
