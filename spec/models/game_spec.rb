@@ -104,12 +104,11 @@ RSpec.describe Game, type: :model do
       game_w_questions.current_level = 2
       #у игры 2 уровня должен быть сейчас доступен 2 вопрос
       expect(game_w_questions.current_game_question).to eq(game_w_questions.game_questions[2])
-      expect(game_w_questions.current_game_question).not_to eq(game_w_questions.game_questions[3])
     end
   end
 
   #тест метода #previous_level
-  describe '#current_game_question' do
+  describe '#previous_level' do
     it 'get correctly answer' do
       game_w_questions.current_level = 2
       #предыдущий уровень - это "текущий уровень" - 1
