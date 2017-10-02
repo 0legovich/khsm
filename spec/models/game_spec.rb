@@ -119,30 +119,37 @@ RSpec.describe Game, type: :model do
   # тест метода #answer_current_question!
   describe '#answer_current_question!' do
 
-    before(:suite) {game_w_questions.current_level = 2}
-
+    # даем верный ответ
     context 'when the answer is correct' do
+      before(:each) {game_w_questions.current_level = 2}
+      after(:each) {expect(game_w_questions.is_failed).to be_falsey}
+
       it 'method return true' do
         expect(game_w_questions.answer_current_question!('d')).to be_truthy
       end
 
-      it 'level up' do
-        level = game_w_questions.current_level
+      it 'level is up' do
         game_w_questions.answer_current_question!('d')
 
-        expect(game_w_questions.current_level).to eq(level + 1)
+        expect(game_w_questions.current_level).to eq(3)
+        expect(game_w_questions.status).to eq(:in_progress)
       end
 
-      it 'finished game' do
+      it 'game is finished', skip_before: true do
         game_w_questions.current_level = 14
         game_w_questions.answer_current_question!('d')
 
         expect(game_w_questions.finished_at).not_to eq(nil)
-        expect(game_w_questions.is_failed).to be_falsey
+        expect(game_w_questions.status).to eq(:won)
+        expect(game_w_questions.current_level).to eq(15)
       end
     end
 
+    # даем неверный ответ
     context 'when the answer is not correct' do
+      before(:each) {game_w_questions.current_level = 2}
+      after(:each) {expect(game_w_questions.is_failed).to be_truthy}
+
       it 'method return false' do
         expect(game_w_questions.answer_current_question!('a')).to be_falsey
       end
@@ -151,27 +158,33 @@ RSpec.describe Game, type: :model do
         game_w_questions.answer_current_question!('a')
 
         expect(game_w_questions.finished_at).not_to eq(nil)
-        expect(game_w_questions.is_failed).to be_truthy
+        expect(game_w_questions.status).to eq(:fail)
+        expect(game_w_questions.current_level).to eq(2)
       end
     end
 
+    # когда игра закончена (не важно по какой причине)
     context 'when game is finished' do
 
       # даже с правильным ответом метод вернет false
       it 'method return false' do
         game_w_questions.finished_at = Time.now
+
         expect(game_w_questions.answer_current_question!('d')).to be_falsey
+        expect(game_w_questions.finished_at).not_to eq(nil)
       end
     end
 
+    # когда время вышло
     context 'when time is out' do
 
-      # моделируем истечение времени игры подменой возвращаемого
-      # значения метода time_out!
       # даже с правильным ответом метод вернет false
       it 'method return false' do
-        allow(game_w_questions).to receive(:time_out!).and_return(true)
+        game_w_questions.created_at = 2.day.ago
+
         expect(game_w_questions.answer_current_question!('d')).to be_falsey
+        expect(game_w_questions.status).to eq(:timeout)
+        expect(game_w_questions.finished_at).not_to eq(nil)
       end
     end
   end
