@@ -29,6 +29,15 @@ class GameQuestion < ActiveRecord::Base
   # них — целое число от 1 до 4.
   validates :a, :b, :c, :d, inclusion: {in: 1..4}
 
+  serialize :help_hash, Hash
+
+  # help_hash имеет следующий формат:
+  # {
+  #   fifty_fifty: ['a', 'b'],
+  #   audience_help: {'a' => 42, 'c' => 37 ...},
+  #   friend_call: 'Василий Петрович ситает, что правильный ответ А'
+  # }
+
   # Основные методы для доступа к данным в шаблонах и контроллерах:
 
   # Метод variants возвращает хэш с ключами a..d и значениями — тектом ответов:
@@ -64,5 +73,14 @@ class GameQuestion < ActiveRecord::Base
   # Метод correct_answer возвращает текст правильного ответа
   def correct_answer
     variants[correct_answer_key]
+  end
+
+  def add_audience_help
+    self.help_hash[:audience_help] = {
+      'a' => rand(100),
+      'b' => rand(100),
+      'c' => rand(100),
+      'd' => rand(100)
+    }
   end
 end

@@ -32,4 +32,17 @@ RSpec.describe GameQuestion, type: :model do
       expect {game_question.level}.not_to raise_exception
     end
   end
+
+  context 'user_helpers' do
+    it 'correct audience_help' do
+      expect(game_question.help_hash).not_to include(:audience_help)
+
+      game_question.add_audience_help
+
+      expect(game_question.help_hash).to include(:audience_help)
+      expect(game_question.help_hash[:audience_help].keys).to contain_exactly(
+                                                                'a', 'b', 'c', 'd'
+                                                              )
+    end
+  end
 end

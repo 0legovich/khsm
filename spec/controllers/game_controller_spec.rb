@@ -205,4 +205,21 @@ RSpec.describe GamesController, type: :controller do
       end
     end
   end
+
+  describe 'PUT #help' do
+    it 'used audience help' do
+      expect(game_w_questions.audience_help_used).to be_falsey
+      expect(game_w_questions.current_game_question.help_hash[:audience_help]).not_to be
+
+      put :help, id: game_w_questions.id, help_type: :audience_help
+      game = assigns(:game)
+
+      expect(game.finished?).to be_falsey
+      expect(game.audience_help_used).to be_truthy
+      expect(game.current_game_question.help_hash[:audience_help]).to be
+      expect(
+        game.current_game_question.help_hash[:audience_help].keys
+      ).to contain_exactly('a', 'b', 'c', 'd')
+    end
+  end
 end
