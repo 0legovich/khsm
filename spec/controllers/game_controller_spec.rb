@@ -92,15 +92,14 @@ RSpec.describe GamesController, type: :controller do
   end
 
   describe 'PUT #answer' do
-    before(:each) do
-      put :answer, {
-        id: game_w_questions.id,
-        letter: game_w_questions.current_game_question.correct_answer_key
-      }
-    end
     # если пользователь не залогинен
     context 'when user is anon' do
       it 'redirect to the login page', :skip_before do
+        put :answer, {
+          id: game_w_questions.id,
+          letter: game_w_questions.current_game_question.correct_answer_key
+        }
+
         expect(response.status).not_to eq 200
         expect(response).to redirect_to(new_user_session_path)
         expect(flash[:alert]).to be
@@ -111,12 +110,32 @@ RSpec.describe GamesController, type: :controller do
     context 'when user is autorize' do
       context 'when answer is correct' do
         it 'the game continues' do
+          put :answer, {
+            id: game_w_questions.id,
+            letter: game_w_questions.current_game_question.correct_answer_key
+          }
           game = assigns(:game)
 
           expect(game.finished?).to be_falsey
           expect(game.current_level).to be > 0
           expect(response).to redirect_to(game_path(game))
           expect(flash.empty?).to be_truthy
+        end
+      end
+
+      context 'when answer is not correct' do
+        it 'the game finishes' do
+          put :answer, {
+            id: game_w_questions.id,
+            letter: 'b'
+          }
+          game = assigns(:game)
+
+          expect(game.finished?).to be_truthy
+          expect(game.current_level).to eq 0
+          expect(game.status).to eq :fail
+          expect(response).to redirect_to(user_path(user))
+          expect(flash[:alert]).to be
         end
       end
     end
