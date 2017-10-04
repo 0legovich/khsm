@@ -19,7 +19,7 @@ RSpec.describe GamesController, type: :controller do
 
   describe 'GET #show' do
     # если пользователь не залогинен
-    context 'where user is anon' do
+    context 'when user is anon' do
       it 'redirect to the login page', :skip_before do
         get :show, id: game_w_questions.id
 
@@ -30,7 +30,7 @@ RSpec.describe GamesController, type: :controller do
     end
 
     # если пользователь залогинен
-    context 'where user is autorise' do
+    context 'when user is autorise' do
       it 'shows his game' do
         get :show, id: game_w_questions.id
         game = assigns(:game)
@@ -57,6 +57,16 @@ RSpec.describe GamesController, type: :controller do
       post :create
     end
 
+    # если пользователь не залогинен
+    context 'when user is anon' do
+      it 'redirect to the login page', :skip_before do
+
+        expect(response.status).not_to eq 200
+        expect(response).to redirect_to(new_user_session_path)
+        expect(flash[:alert]).to be
+      end
+    end
+
     # если пользователь залогинен
     context 'when user is autorize' do
       it 'creates the game' do
@@ -68,7 +78,7 @@ RSpec.describe GamesController, type: :controller do
         expect(flash[:notice]).to be
       end
 
-      it 'not to creates the game' do
+      it 'not to creates the second game' do
         game = assigns(:game)
         expect(game.finished?).to be_falsey
 
@@ -82,69 +92,97 @@ RSpec.describe GamesController, type: :controller do
   end
 
   describe 'PUT #answer' do
-    context 'when answer is correct' do
-      it 'the game continues' do
-        put :answer, {
-          id: game_w_questions.id,
-          letter: game_w_questions.current_game_question.correct_answer_key
-        }
-        game = assigns(:game)
+    before(:each) do
+      put :answer, {
+        id: game_w_questions.id,
+        letter: game_w_questions.current_game_question.correct_answer_key
+      }
+    end
+    # если пользователь не залогинен
+    context 'when user is anon' do
+      it 'redirect to the login page', :skip_before do
+        expect(response.status).not_to eq 200
+        expect(response).to redirect_to(new_user_session_path)
+        expect(flash[:alert]).to be
+      end
+    end
 
-        expect(game.finished?).to be_falsey
-        expect(game.current_level).to be > 0
-        expect(response).to redirect_to(game_path(game))
-        expect(flash.empty?).to be_truthy
+    # когда пользователь залогинен
+    context 'when user is autorize' do
+      context 'when answer is correct' do
+        it 'the game continues' do
+          game = assigns(:game)
+
+          expect(game.finished?).to be_falsey
+          expect(game.current_level).to be > 0
+          expect(response).to redirect_to(game_path(game))
+          expect(flash.empty?).to be_truthy
+        end
       end
     end
   end
 
   describe 'PUT #take_money' do
-    # когда приза нет - начало игры
-    context 'when prize is nil' do
-      before(:each) do
+    # если пользователь не залогинен
+    context 'when user is anon' do
+      it 'redirect to the login page', :skip_before do
         put :take_money, id: game_w_questions.id
 
-        expect(response).to redirect_to user_path(user)
-      end
-
-      it 'user take 0' do
-        game = assigns(:game)
-        user = game.user
-
-        expect(response).to redirect_to user_path(user)
-        expect(game.prize).to eq 0
-        expect(user.balance).to eq 0
-      end
-
-      it 'game is finished' do
-        game = assigns(:game)
-
-        expect(game.finished?).to be_truthy
-        expect(game.status).to eq :money
+        expect(response.status).not_to eq 200
+        expect(response).to redirect_to(new_user_session_path)
+        expect(flash[:alert]).to be
       end
     end
-    # когда приз существует, то есть это не начало игры
-    context 'when prize is present' do
-      before(:each) do
-        game_w_questions.update_attributes(current_level: 2)
-        put :take_money, id: game_w_questions.id
 
-        expect(response).to redirect_to user_path(user)
+    # когда пользователь залогинен
+    context 'when user is autorize' do
+      # когда приза нет - начало игры
+      context 'when prize is nil' do
+        before(:each) do
+          put :take_money, id: game_w_questions.id
+
+          expect(response).to redirect_to user_path(user)
+        end
+
+        it 'user take 0' do
+          game = assigns(:game)
+          user = game.user
+
+          expect(response).to redirect_to user_path(user)
+          expect(game.prize).to eq 0
+          expect(user.balance).to eq 0
+        end
+
+        it 'game is finished' do
+          game = assigns(:game)
+
+          expect(game.finished?).to be_truthy
+          expect(game.status).to eq :money
+        end
       end
+      # когда приз существует, то есть это не начало игры
+      context 'when prize is present' do
+        before(:each) do
+          game_w_questions.update_attributes(current_level: 2)
+          put :take_money, id: game_w_questions.id
 
-      it 'user take money' do
-        game = assigns(:game)
-        user = game.user
+          expect(response).to redirect_to user_path(user)
+        end
 
-        expect(game.prize).to eq 200
-        expect(user.balance).to eq 200
-      end
+        it 'user take money' do
+          game = assigns(:game)
+          user = game.user
 
-      it 'game is finished' do
-        game = assigns(:game)
+          expect(game.prize).to eq 200
+          expect(user.balance).to eq 200
+        end
 
-        expect(game.finished?).to be_truthy
-        expect(game.status).to eq :money
+        it 'game is finished' do
+          game = assigns(:game)
+
+          expect(game.finished?).to be_truthy
+          expect(game.status).to eq :money
+        end
       end
     end
   end
