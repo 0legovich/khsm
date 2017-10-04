@@ -121,7 +121,9 @@ RSpec.describe Game, type: :model do
 
     # даем верный ответ
     context 'when the answer is correct' do
-      before(:each) {game_w_questions.current_level = 2}
+      before(:each) do |example|
+        game_w_questions.current_level = 2 unless example.metadata[:skip_before]
+      end
       after(:each) {expect(game_w_questions.is_failed).to be_falsey}
 
       it 'method return true' do
@@ -135,7 +137,7 @@ RSpec.describe Game, type: :model do
         expect(game_w_questions.status).to eq(:in_progress)
       end
 
-      it 'game is finished', skip_before: true do
+      it 'game is finished', :skip_before do
         game_w_questions.current_level = 14
         game_w_questions.answer_current_question!('d')
 
