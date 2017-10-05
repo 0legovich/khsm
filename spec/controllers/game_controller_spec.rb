@@ -207,19 +207,51 @@ RSpec.describe GamesController, type: :controller do
   end
 
   describe 'PUT #help' do
-    it 'used audience help' do
-      expect(game_w_questions.audience_help_used).to be_falsey
-      expect(game_w_questions.current_game_question.help_hash[:audience_help]).not_to be
+    # юзаем подсказку "помощь зала"
+    context 'when use the audience help' do
+      it 'can use the first time' do
+        expect(game_w_questions.audience_help_used).to be_falsey
+        expect(game_w_questions.current_game_question.help_hash[:audience_help]).not_to be
 
-      put :help, id: game_w_questions.id, help_type: :audience_help
-      game = assigns(:game)
+        put :help, id: game_w_questions.id, help_type: :audience_help
+        game = assigns(:game)
 
-      expect(game.finished?).to be_falsey
-      expect(game.audience_help_used).to be_truthy
-      expect(game.current_game_question.help_hash[:audience_help]).to be
-      expect(
-        game.current_game_question.help_hash[:audience_help].keys
-      ).to contain_exactly('a', 'b', 'c', 'd')
+        expect(game.finished?).to be_falsey
+        expect(game.audience_help_used).to be_truthy
+        expect(game.current_game_question.help_hash[:audience_help]).to be
+        expect(
+          game.current_game_question.help_hash[:audience_help].keys
+        ).to contain_exactly('a', 'b', 'c', 'd')
+      end
+    end
+
+    # юзаем подсказку "50 / 50"
+    context 'when use the fifty_fifty' do
+      # подсказку можно использовать впервые
+      it 'can uses the first time' do
+        expect(game_w_questions.fifty_fifty_used).to be_falsey
+        expect(game_w_questions.current_game_question.help_hash[:fifty_fifty]).not_to be
+
+        put :help, id: game_w_questions.id, help_type: :fifty_fifty
+        game = assigns(:game)
+
+        expect(game.finished?).to be_falsey
+        expect(game.fifty_fifty_used).to be_truthy
+        expect(game.current_game_question.help_hash[:fifty_fifty].count).to eq 2
+        expect(
+          game.current_game_question.help_hash[:fifty_fifty]
+        ).to include('d')
+      end
+      # подсказку нельзя использовать повторно
+      it 'can not reuses' do
+        allow(game_w_questions).to receive(:fifty_fifty_used).and_return(true)
+
+        put :help, id: game_w_questions.id, help_type: :fifty_fifty
+        game = assigns(:game)
+
+        expect(game.finished?).to be_falsey
+        expect(:alert).to be
+      end
     end
   end
 end
