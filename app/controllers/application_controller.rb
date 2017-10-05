@@ -1,4 +1,5 @@
 class ApplicationController < ActionController::Base
+  helper GamesHelper
   protect_from_forgery with: :exception
 
   before_action :configure_devise_params, if: :devise_controller?
