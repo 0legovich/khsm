@@ -73,4 +73,15 @@ RSpec.describe GameQuestion, type: :model do
       )
     end
   end
+
+  describe '#add_friend_call' do
+    it 'add ":friend_call" in help hash' do
+      expect(game_question.help_hash).not_to include(:friend_call)
+
+      game_question.add_friend_call
+
+      expect(game_question.help_hash).to include(:friend_call)
+      expect(game_question.help_hash[:friend_call]).to be
+    end
+  end
 end
