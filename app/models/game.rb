@@ -141,6 +141,12 @@ class Game < ActiveRecord::Base
           toggle!(:audience_help_used)
           current_game_question.add_audience_help
           return true
+          end
+      when :fifty_fifty
+        unless fifty_fifty_used
+          toggle!(:fifty_fifty_used)
+          current_game_question.add_fifty_fifty
+          return true
         end
     end
     false

@@ -59,4 +59,18 @@ RSpec.describe GameQuestion, type: :model do
                                                               )
     end
   end
+
+  describe '#add_fifty_fifty' do
+    it 'add ":fifty_fifty" in help_hash' do
+      expect(game_question.help_hash).not_to include(:fifty_fifty)
+
+      game_question.add_fifty_fifty
+
+      expect(game_question.help_hash).to include(:fifty_fifty)
+      expect(game_question.help_hash[:fifty_fifty].count).to eq 2
+      expect(game_question.help_hash[:fifty_fifty]).to(
+        include(game_question.correct_answer_key)
+      )
+    end
+  end
 end

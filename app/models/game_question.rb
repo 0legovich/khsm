@@ -83,4 +83,8 @@ class GameQuestion < ActiveRecord::Base
       'd' => rand(100)
     }
   end
+
+  def add_fifty_fifty
+    self.help_hash[:fifty_fifty] = ['a', 'b']
+  end
 end
