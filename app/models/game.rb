@@ -33,7 +33,7 @@ class Game < ActiveRecord::Base
   # удовлетворяющих условию. В нашем случае, у которых поле finished_at пусто.
   #
   # http://guides.rubyonrails.org/active_record_querying.html#scopes
-  scope :in_progress, -> { where(finished_at: nil) }
+  scope :in_progress, -> {where(finished_at: nil)}
 
   # Метод класса create_game_for_user! создает игру с правильно созданными
   # игровыми вопросами. Или возвращает ошибку, если этого сделать не удалось.
@@ -68,7 +68,7 @@ class Game < ActiveRecord::Base
 
   # Метод current_game_question возвращает текущий, еще неотвеченный вопрос игры
   def current_game_question
-    game_questions.detect { |q| q.question.level == current_level }
+    game_questions.detect {|q| q.question.level == current_level}
   end
 
   # Метод previous_level возвращает число, равное предыдущему уровню сложности.
@@ -141,15 +141,21 @@ class Game < ActiveRecord::Base
           toggle!(:audience_help_used)
           current_game_question.add_audience_help
           return true
-          end
+        end
       when :fifty_fifty
         unless fifty_fifty_used
           toggle!(:fifty_fifty_used)
           current_game_question.add_fifty_fifty
           return true
         end
+      when :friend_call
+        unless friend_call_used
+          toggle!(:friend_call_used)
+          current_game_question.add_friend_call
+          return true
+        end
+        false
     end
-    false
   end
 
   # Метод take_money! записывает юзеру игровую сумму на счет и завершает игру,
@@ -203,7 +209,7 @@ class Game < ActiveRecord::Base
   # Метод fire_proof_prize по заданному уровню вопроса вычисляет вознаграждение
   # за ближайшую несгораемую сумму.
   def fire_proof_prize(answered_level)
-    level = FIREPROOF_LEVELS.select { |x| x <= answered_level }.last
+    level = FIREPROOF_LEVELS.select {|x| x <= answered_level}.last
     level.present? ? PRIZES[level] : 0
   end
 end
