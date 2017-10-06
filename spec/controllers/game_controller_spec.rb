@@ -14,13 +14,13 @@ RSpec.describe GamesController, type: :controller do
   let(:another_game) {FactoryGirl.create(:game_with_questions, user: another_user)}
 
   before(:each) do |example|
-    sign_in user unless example.metadata[:skip_before]
+    sign_in user unless example.metadata[:skip_sign_in]
   end
 
   describe 'GET #show' do
     # если пользователь не залогинен
     context 'when user is anon' do
-      it 'redirect to the login page', :skip_before do
+      it 'redirect to the login page', :skip_sign_in do
         get :show, id: game_w_questions.id
 
         expect(response.status).not_to eq 200
@@ -59,7 +59,7 @@ RSpec.describe GamesController, type: :controller do
 
     # если пользователь не залогинен
     context 'when user is anon' do
-      it 'redirect to the login page', :skip_before do
+      it 'redirect to the login page', :skip_sign_in do
 
         expect(response.status).not_to eq 200
         expect(response).to redirect_to(new_user_session_path)
@@ -94,7 +94,7 @@ RSpec.describe GamesController, type: :controller do
   describe 'PUT #answer' do
     # если пользователь не залогинен
     context 'when user is anon' do
-      it 'redirect to the login page', :skip_before do
+      it 'redirect to the login page', :skip_sign_in do
         put :answer, {
           id: game_w_questions.id,
           letter: game_w_questions.current_game_question.correct_answer_key
@@ -109,7 +109,7 @@ RSpec.describe GamesController, type: :controller do
     # когда пользователь залогинен
     context 'when user is autorize' do
       context 'when answer is correct' do
-        it 'the game continues' do
+        it 'continues the game' do
           put :answer, {
             id: game_w_questions.id,
             letter: game_w_questions.current_game_question.correct_answer_key
@@ -124,7 +124,7 @@ RSpec.describe GamesController, type: :controller do
       end
 
       context 'when answer is not correct' do
-        it 'the game finishes' do
+        it 'finishes the game' do
           put :answer, {
             id: game_w_questions.id,
             letter: 'b'
@@ -144,7 +144,7 @@ RSpec.describe GamesController, type: :controller do
   describe 'PUT #take_money' do
     # если пользователь не залогинен
     context 'when user is anon' do
-      it 'redirect to the login page', :skip_before do
+      it 'redirect to the login page', :skip_sign_in do
         put :take_money, id: game_w_questions.id
 
         expect(response.status).not_to eq 200
@@ -241,6 +241,7 @@ RSpec.describe GamesController, type: :controller do
         expect(
           game.current_game_question.help_hash[:fifty_fifty]
         ).to include('d')
+        expect(response).to redirect_to game_path(game)
       end
       # подсказку нельзя использовать повторно
       it 'can not reuses' do
@@ -251,6 +252,7 @@ RSpec.describe GamesController, type: :controller do
 
         expect(game.finished?).to be_falsey
         expect(:alert).to be
+        expect(response).to redirect_to game_path(game)
       end
     end
   end
